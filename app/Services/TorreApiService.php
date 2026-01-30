@@ -104,25 +104,62 @@ class TorreApiService
     }
 
     /**
-     * Search for opportunities
+     * Search for opportunities using Torre search API
      *
-     * @param array $criteria Search criteria
+     * @param string|null $searchTerm Search term/keyword
+     * @param int $limit Number of results to return
+     * @param int $offset Offset for pagination
      * @return array|null
      */
-    public function searchOpportunities(array $criteria = []): ?array
+    public function searchOpportunities(?string $searchTerm = null, int $limit = 20, int $offset = 0): ?array
     {
+        // Build cache key based on search parameters
+        $cacheKey = $this->getCacheKey(
+            'search',
+            md5(($searchTerm ?? 'all') . "-{$limit}-{$offset}")
+        );
+
+        // Check cache first (shorter TTL for search results - 1 hour)
+        if (Cache::has($cacheKey)) {
+            Log::info("Torre API: Retrieved search results from cache", [
+                'term' => $searchTerm,
+                'limit' => $limit,
+                'offset' => $offset
+            ]);
+            return Cache::get($cacheKey);
+        }
+
         try {
+            // Build search payload according to Torre API spec
+            $payload = $this->buildSearchPayload($searchTerm, $limit, $offset);
+
+            // Use the correct search endpoint
+            $searchUrl = 'https://search.torre.co/opportunities/_search';
+
             $response = Http::timeout($this->timeout)
                 ->retry($this->retryTimes, $this->retrySleep)
-                ->post("{$this->baseUrl}/opportunities/search", $criteria);
+                ->post($searchUrl, $payload);
 
             if ($response->successful()) {
-                return $response->json();
+                $data = $response->json();
+
+                // Cache search results for 1 hour
+                Cache::put($cacheKey, $data, 3600);
+
+                Log::info("Torre API: Search completed successfully", [
+                    'term' => $searchTerm,
+                    'results' => count($data['results'] ?? []),
+                    'limit' => $limit,
+                    'offset' => $offset
+                ]);
+
+                return $data;
             }
 
             Log::error("Torre API: Failed to search opportunities", [
                 'status' => $response->status(),
-                'criteria' => $criteria
+                'term' => $searchTerm,
+                'body' => $response->body()
             ]);
 
             return null;
@@ -130,11 +167,41 @@ class TorreApiService
         } catch (\Exception $e) {
             Log::error("Torre API: Exception while searching opportunities", [
                 'error' => $e->getMessage(),
-                'criteria' => $criteria
+                'term' => $searchTerm
             ]);
 
             return null;
         }
+    }
+
+    /**
+     * Build search payload for Torre API
+     *
+     * @param string|null $searchTerm
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     */
+    private function buildSearchPayload(?string $searchTerm, int $limit, int $offset): array
+    {
+        $payload = [
+            'size' => $limit,
+            'offset' => $offset,
+        ];
+
+        // Add search criteria if term provided
+        if (!empty($searchTerm)) {
+            $payload['and'] = [
+                [
+                    'keywords' => [
+                        'term' => $searchTerm,
+                        'locale' => 'en'
+                    ]
+                ]
+            ];
+        }
+
+        return $payload;
     }
 
     /**

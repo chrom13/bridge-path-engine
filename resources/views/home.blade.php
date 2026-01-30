@@ -87,30 +87,83 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
+    <!-- Your Top Strengths -->
+    @php
+        $user = Session::get('user');
+        $strengths = $user['genome_data']['strengths'] ?? [];
+
+        // Sort by weight (importance) and get top 5
+        usort($strengths, function($a, $b) {
+            return ($b['weight'] ?? 0) <=> ($a['weight'] ?? 0);
+        });
+        $topStrengths = array_slice($strengths, 0, 5);
+
+        // Proficiency colors
+        $proficiencyColors = [
+            'expert' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-700', 'border' => 'border-purple-300'],
+            'proficient' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700', 'border' => 'border-blue-300'],
+            'competent' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'border' => 'border-green-300'],
+            'beginner' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-700', 'border' => 'border-gray-300'],
+        ];
+    @endphp
+
     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white">
-        <div class="flex flex-col md:flex-row items-center justify-between">
-            <div class="mb-6 md:mb-0">
-                <h2 class="text-2xl font-bold mb-2">Ready to get started?</h2>
-                <p class="text-indigo-100">
-                    Search for opportunities or browse popular tech roles
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold mb-2">Your Top Strengths</h2>
+            <p class="text-indigo-100">
+                Search for opportunities matching your strongest skills
+            </p>
+        </div>
+
+        @if(count($topStrengths) > 0)
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                @foreach($topStrengths as $strength)
+                    @php
+                        $proficiency = strtolower($strength['proficiency'] ?? 'beginner');
+                        $colors = $proficiencyColors[$proficiency] ?? $proficiencyColors['beginner'];
+                        $hasRecommendations = ($strength['recommendations'] ?? 0) > 0;
+                    @endphp
+
+                    <a href="{{ route('opportunities.search', ['query' => $strength['name']]) }}"
+                       class="group bg-white rounded-xl p-4 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+                        <div class="flex flex-col h-full">
+                            <!-- Skill Name -->
+                            <h3 class="text-gray-900 font-semibold text-sm mb-2 group-hover:text-indigo-600 transition-colors">
+                                {{ $strength['name'] }}
+                            </h3>
+
+                            <!-- Proficiency Badge -->
+                            <div class="flex items-center justify-between mt-auto">
+                                <span class="{{ $colors['bg'] }} {{ $colors['text'] }} {{ $colors['border'] }} border px-2 py-1 rounded-md text-xs font-medium capitalize">
+                                    {{ $proficiency }}
+                                </span>
+
+                                <!-- Recommendations indicator -->
+                                @if($hasRecommendations)
+                                    <div class="flex items-center text-xs text-gray-500" title="{{ $strength['recommendations'] }} recommendations">
+                                        <svg class="h-3 w-3 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        <span class="font-medium">{{ $strength['recommendations'] }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <!-- View All Skills Link -->
+            <div class="mt-6 text-center">
+                <p class="text-indigo-100 text-sm">
+                    Showing your top {{ count($topStrengths) }} skills • {{ count($strengths) }} total skills in your profile
                 </p>
             </div>
-            <div class="flex flex-wrap gap-3">
-                <a href="{{ route('opportunities.search', ['query' => 'Laravel']) }}"
-                   class="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition duration-150">
-                    Laravel Jobs
-                </a>
-                <a href="{{ route('opportunities.search', ['query' => 'React']) }}"
-                   class="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition duration-150">
-                    React Jobs
-                </a>
-                <a href="{{ route('opportunities.search', ['query' => 'DevOps']) }}"
-                   class="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition duration-150">
-                    DevOps Jobs
-                </a>
+        @else
+            <div class="bg-white/10 backdrop-blur rounded-lg p-6 text-center">
+                <p class="text-white/90">No skills found in your Torre profile. Update your profile on Torre.ai to see your strengths here.</p>
             </div>
-        </div>
+        @endif
     </div>
 
     <!-- Stats Section -->

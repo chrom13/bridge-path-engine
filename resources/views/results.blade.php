@@ -16,7 +16,16 @@
                     @endif
                 </h1>
                 <p class="text-gray-600 mt-1">
-                    Found {{ count($opportunities) }} {{ Str::plural('opportunity', count($opportunities)) }}
+                    @if(isset($total))
+                        Found {{ number_format($total) }} {{ Str::plural('opportunity', $total) }}
+                        @if($offset > 0)
+                            (Showing {{ $offset + 1 }}-{{ min($offset + $limit, $total) }})
+                        @else
+                            (Showing {{ count($opportunities) }})
+                        @endif
+                    @else
+                        Found {{ count($opportunities) }} {{ Str::plural('opportunity', count($opportunities)) }}
+                    @endif
                 </p>
             </div>
             <a href="{{ route('home') }}" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
@@ -62,15 +71,23 @@
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-start space-x-4 flex-1">
                                 <!-- Company Logo -->
-                                @if(isset($opportunity['organizations'][0]['picture']))
+                                @php
+                                    $orgPicture = $opportunity['organizations'][0]['picture'] ?? null;
+                                    $orgName = $opportunity['organizations'][0]['name'] ?? 'Unknown';
+                                @endphp
+                                @if($orgPicture)
                                     <img
-                                        src="{{ $opportunity['organizations'][0]['picture'] }}"
-                                        alt="{{ $opportunity['organizations'][0]['name'] }}"
+                                        src="{{ $orgPicture }}"
+                                        alt="{{ $orgName }}"
                                         class="w-16 h-16 rounded-lg object-cover border border-gray-200"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                                     >
+                                    <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 items-center justify-center text-white font-bold text-xl hidden">
+                                        {{ substr($orgName, 0, 1) }}
+                                    </div>
                                 @else
                                     <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl">
-                                        {{ substr($opportunity['organizations'][0]['name'], 0, 1) }}
+                                        {{ substr($orgName, 0, 1) }}
                                     </div>
                                 @endif
 
@@ -80,7 +97,7 @@
                                         {{ $opportunity['objective'] }}
                                     </h2>
                                     <p class="text-gray-600 mb-2">
-                                        {{ $opportunity['organizations'][0]['name'] }}
+                                        {{ $orgName }}
                                         @if(isset($opportunity['organizations'][0]['size']))
                                             <span class="text-gray-400">• {{ $opportunity['organizations'][0]['size'] }} employees</span>
                                         @endif
@@ -209,6 +226,58 @@
                 </div>
             @endforeach
         </div>
+
+        <!-- Pagination -->
+        @if(isset($total) && $total > $limit)
+            <div class="mt-8 flex items-center justify-center">
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    <!-- Previous Button -->
+                    @if($offset > 0)
+                        <a href="{{ route('opportunities.search', ['query' => $query, 'offset' => max(0, $offset - $limit), 'limit' => $limit]) }}"
+                           class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            <svg class="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Previous
+                        </a>
+                    @else
+                        <span class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                            <svg class="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Previous
+                        </span>
+                    @endif
+
+                    <!-- Page Info -->
+                    @php
+                        $currentPage = floor($offset / $limit) + 1;
+                        $totalPages = ceil($total / $limit);
+                    @endphp
+                    <span class="relative inline-flex items-center px-6 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700">
+                        Page <span class="font-bold mx-1">{{ $currentPage }}</span> of <span class="font-bold mx-1">{{ $totalPages }}</span>
+                    </span>
+
+                    <!-- Next Button -->
+                    @if($offset + $limit < $total)
+                        <a href="{{ route('opportunities.search', ['query' => $query, 'offset' => $offset + $limit, 'limit' => $limit]) }}"
+                           class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Next
+                            <svg class="h-5 w-5 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                        </a>
+                    @else
+                        <span class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                            Next
+                            <svg class="h-5 w-5 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                        </span>
+                    @endif
+                </nav>
+            </div>
+        @endif
     @else
         <!-- No Results -->
         <div class="bg-white rounded-xl shadow-md p-12 text-center">
