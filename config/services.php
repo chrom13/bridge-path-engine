@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'torre' => [
+        'api_url' => env('TORRE_API_URL', 'https://torre.ai/api'),
+        'timeout' => env('TORRE_API_TIMEOUT', 30),
+        'retry_times' => env('TORRE_API_RETRY_TIMES', 3),
+        'retry_sleep' => env('TORRE_API_RETRY_SLEEP', 1000),
+        'cache_ttl' => env('TORRE_CACHE_TTL', 86400), // 24 hours
+    ],
+
 ];

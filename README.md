@@ -109,6 +109,101 @@ docker-compose exec nginx curl http://localhost
 
 You should see the Laravel welcome page.
 
+## Torre API Integration
+
+### Authentication with Torre
+
+The application uses the **Torre API** for user authentication. When a user logs in:
+
+1. The application calls `https://torre.ai/api/genome/bios/{username}`
+2. User genome data is retrieved and validated
+3. Data is **cached in Redis for 24 hours** to improve performance
+4. Subsequent logins within 24 hours use cached data
+
+### Testing Torre API
+
+Test the Torre API integration using Tinker:
+
+```bash
+docker-compose exec app php artisan tinker
+```
+
+Then run:
+
+```php
+use App\Services\TorreApiService;
+$api = app(TorreApiService::class);
+
+// Fetch a user (will be cached for 24 hours)
+$user = $api->getUserGenome('torrenegra');
+echo "User: " . ($user['name'] ?? 'Not found') . PHP_EOL;
+
+// Check if cached
+$isCached = $api->hasCachedGenome('torrenegra');
+echo "Cached: " . ($isCached ? 'Yes' : 'No') . PHP_EOL;
+
+// Clear cache
+$api->clearUserCache('torrenegra');
+```
+
+### Valid Torre Usernames for Testing
+
+- `torrenegra` - Alexander Torrenegra (Founder)
+- `renanpeixotox` - Renan Peixoto (Head of Engineering)
+- `joranboc` - Jorge Bocanegra (Tech Lead)
+- Or use your own Torre username!
+
+### Cache Configuration
+
+Redis caching is configured in [config/services.php](config/services.php):
+
+```php
+'torre' => [
+    'api_url' => env('TORRE_API_URL', 'https://torre.ai/api'),
+    'timeout' => env('TORRE_API_TIMEOUT', 30),
+    'retry_times' => env('TORRE_API_RETRY_TIMES', 3),
+    'retry_sleep' => env('TORRE_API_RETRY_SLEEP', 1000),
+    'cache_ttl' => env('TORRE_CACHE_TTL', 86400), // 24 hours
+],
+```
+
+### Monitoring Cache
+
+Monitor Redis cache in real-time:
+
+```bash
+# Watch Redis commands
+docker-compose exec redis redis-cli monitor
+
+# Check cache keys
+docker-compose exec redis redis-cli KEYS "torre:*"
+
+# Get TTL for a cached user
+docker-compose exec redis redis-cli TTL "torre:api:genome:torrenegra"
+```
+
+## Using the Application
+
+### Login Flow
+
+1. Navigate to `http://localhost:8000`
+2. Enter a valid **Torre username**
+3. Application fetches your Torre Genome data
+4. Profile data cached for 24 hours
+5. Redirected to home page with search functionality
+
+### First Login vs Cached Login
+
+**First Login:**
+- Calls Torre API: `GET /api/genome/bios/{username}`
+- Stores data in Redis with 24h TTL
+- Message: "Welcome, {Name}! Your profile has been loaded from Torre."
+
+**Subsequent Login (within 24h):**
+- Retrieves data from Redis cache
+- No API call made
+- Message: "Welcome back, {Name}! (Data from cache)"
+
 ## Common Commands
 
 ### Container Management
