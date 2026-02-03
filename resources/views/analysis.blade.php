@@ -152,7 +152,7 @@
 
                     <!-- Book Session Button -->
                     <button
-                        onclick="alert('Mentorship booking coming soon!')"
+                        onclick="openBookingModal('{{ $mentor->mentorId }}', '{{ $mentor->mentorName }}', {{ $mentor->recommendedHours }})"
                         class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition duration-150"
                     >
                         Book Session
@@ -179,6 +179,137 @@
                         class="px-6 py-3 bg-white text-purple-600 font-bold rounded-lg hover:bg-purple-50 transition duration-150 shadow-lg"
                     >
                         Upgrade to Premium - $29/mo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b">
+                <h3 class="text-2xl font-bold text-gray-900" id="modalMentorName">Book Mentorship Session</h3>
+                <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="mt-6">
+                <p class="text-gray-600 mb-6">Choose a mentorship package to get started with personalized guidance:</p>
+
+                <!-- Hour Packages -->
+                <div class="grid md:grid-cols-3 gap-4">
+                    <!-- 3 Hours Package -->
+                    <div class="package-option border-2 border-gray-300 rounded-lg p-6 cursor-pointer hover:border-indigo-500 transition-all" data-hours="3" onclick="selectPackage(3)">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-gray-900 mb-2">3 Hours</div>
+                            <div class="text-gray-600 text-sm mb-4">Starter Package</div>
+                            <div class="text-2xl font-bold text-indigo-600 mb-4">$89</div>
+                            <ul class="text-sm text-gray-600 text-left space-y-2">
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Perfect for minor skill gaps</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Quick skill boosts</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>1-on-1 sessions</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 10 Hours Package -->
+                    <div class="package-option border-2 border-gray-300 rounded-lg p-6 cursor-pointer hover:border-indigo-500 transition-all relative" data-hours="10" onclick="selectPackage(10)">
+                        <div id="recommendedBadge10" class="hidden absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                            ⭐ RECOMMENDED
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-gray-900 mb-2">10 Hours</div>
+                            <div class="text-gray-600 text-sm mb-4">Professional Package</div>
+                            <div class="text-2xl font-bold text-indigo-600 mb-4">$279 <span class="text-sm text-gray-500 line-through">$297</span></div>
+                            <ul class="text-sm text-gray-600 text-left space-y-2">
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Ideal for moderate gaps</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Structured learning path</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Code reviews included</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 20 Hours Package -->
+                    <div class="package-option border-2 border-gray-300 rounded-lg p-6 cursor-pointer hover:border-indigo-500 transition-all relative" data-hours="20" onclick="selectPackage(20)">
+                        <div id="recommendedBadge20" class="hidden absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                            ⭐ RECOMMENDED
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-gray-900 mb-2">20 Hours</div>
+                            <div class="text-gray-600 text-sm mb-4">Intensive Package</div>
+                            <div class="text-2xl font-bold text-indigo-600 mb-4">$529 <span class="text-sm text-gray-500 line-through">$594</span></div>
+                            <ul class="text-sm text-gray-600 text-left space-y-2">
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Critical gap mastery</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Full transformation</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Career acceleration</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Button -->
+                <div class="mt-8 flex items-center justify-between">
+                    <div class="text-sm text-gray-500">
+                        💡 All packages include lifetime access to session recordings
+                    </div>
+                    <button
+                        id="confirmBookingBtn"
+                        onclick="confirmBooking()"
+                        class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-150 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled
+                    >
+                        Confirm Booking
                     </button>
                 </div>
             </div>
@@ -290,6 +421,99 @@
                 }
             }
         });
+    });
+
+    // Booking Modal Variables
+    let selectedMentorId = null;
+    let selectedMentorName = null;
+    let selectedHours = null;
+    let recommendedHours = null;
+
+    // Open Booking Modal
+    function openBookingModal(mentorId, mentorName, recommended) {
+        selectedMentorId = mentorId;
+        selectedMentorName = mentorName;
+        recommendedHours = recommended;
+        selectedHours = null;
+
+        // Update modal title
+        document.getElementById('modalMentorName').textContent = 'Book Session with ' + mentorName;
+
+        // Hide all recommended badges first
+        document.getElementById('recommendedBadge10').classList.add('hidden');
+        document.getElementById('recommendedBadge20').classList.add('hidden');
+
+        // Show recommended badge for the AI-recommended package
+        if (recommended === 10) {
+            document.getElementById('recommendedBadge10').classList.remove('hidden');
+        } else if (recommended === 20) {
+            document.getElementById('recommendedBadge20').classList.remove('hidden');
+        }
+
+        // Reset package selections
+        document.querySelectorAll('.package-option').forEach(el => {
+            el.classList.remove('border-indigo-600', 'bg-indigo-50');
+            el.classList.add('border-gray-300');
+        });
+
+        // Disable confirm button
+        document.getElementById('confirmBookingBtn').disabled = true;
+
+        // Show modal
+        document.getElementById('bookingModal').classList.remove('hidden');
+    }
+
+    // Close Booking Modal
+    function closeBookingModal() {
+        document.getElementById('bookingModal').classList.add('hidden');
+        selectedMentorId = null;
+        selectedMentorName = null;
+        selectedHours = null;
+        recommendedHours = null;
+    }
+
+    // Select Package
+    function selectPackage(hours) {
+        selectedHours = hours;
+
+        // Remove selection from all packages
+        document.querySelectorAll('.package-option').forEach(el => {
+            el.classList.remove('border-indigo-600', 'bg-indigo-50');
+            el.classList.add('border-gray-300');
+        });
+
+        // Highlight selected package
+        const selectedPackage = document.querySelector(`[data-hours="${hours}"]`);
+        selectedPackage.classList.remove('border-gray-300');
+        selectedPackage.classList.add('border-indigo-600', 'bg-indigo-50');
+
+        // Enable confirm button
+        document.getElementById('confirmBookingBtn').disabled = false;
+    }
+
+    // Confirm Booking
+    function confirmBooking() {
+        if (!selectedHours || !selectedMentorId) {
+            return;
+        }
+
+        const packages = {
+            3: '$89',
+            10: '$279',
+            20: '$529'
+        };
+
+        alert(`Booking confirmed!\n\nMentor: ${selectedMentorName}\nPackage: ${selectedHours} hours\nPrice: ${packages[selectedHours]}\n\nYou will receive a confirmation email shortly with scheduling details.`);
+
+        closeBookingModal();
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('bookingModal');
+        if (event.target === modal) {
+            closeBookingModal();
+        }
     });
 </script>
 @endpush

@@ -287,7 +287,8 @@ You must respond with a valid JSON object containing these exact fields:
          "mentor_name": "Marcus Laravel",
          "expertise": "Laravel Expert & Backend Architecture",
          "why": "Why this mentor is recommended",
-         "focus_areas": ["Area 1", "Area 2"]
+         "focus_areas": ["Area 1", "Area 2"],
+         "recommended_hours": 10  // Recommended mentorship hours: 3, 10, or 20
        }
      ],
      "upsell_message": "Upgrade to our $29/mo Premium Plan for unlimited mentorship sessions and personalized learning paths!"
@@ -300,6 +301,7 @@ You must respond with a valid JSON object containing these exact fields:
 - Severity levels: Critical (must-have for role), Moderate (important), Minor (nice-to-have)
 - Include the upsell message exactly as shown
 - Map proficiency levels: expert=90-100, proficient=70-89, competent=50-69, beginner=0-49
+- Recommended hours: 3 (minor gaps), 10 (moderate gaps), 20 (critical/multiple gaps)
 - Ensure all JSON is valid and properly formatted
 SYSTEM;
     }

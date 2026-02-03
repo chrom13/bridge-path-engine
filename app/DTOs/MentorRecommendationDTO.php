@@ -9,7 +9,8 @@ class MentorRecommendationDTO
         public readonly string $mentorName,
         public readonly string $expertise,
         public readonly string $why,
-        public readonly array $focusAreas
+        public readonly array $focusAreas,
+        public readonly int $recommendedHours
     ) {
     }
 
@@ -20,7 +21,8 @@ class MentorRecommendationDTO
             mentorName: $data['mentor_name'] ?? '',
             expertise: $data['expertise'] ?? '',
             why: $data['why'] ?? '',
-            focusAreas: $data['focus_areas'] ?? []
+            focusAreas: $data['focus_areas'] ?? [],
+            recommendedHours: $data['recommended_hours'] ?? 10
         );
     }
 
@@ -32,6 +34,7 @@ class MentorRecommendationDTO
             'expertise' => $this->expertise,
             'why' => $this->why,
             'focus_areas' => $this->focusAreas,
+            'recommended_hours' => $this->recommendedHours,
         ];
     }
 }
