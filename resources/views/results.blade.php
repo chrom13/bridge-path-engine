@@ -205,12 +205,15 @@
                                 Posted {{ \Carbon\Carbon::parse($opportunity['created'])->diffForHumans() }}
                             </div>
                             <div class="flex space-x-3">
-                                <button
-                                    onclick="alert('View Details feature coming soon!')"
-                                    class="px-6 py-2.5 border border-indigo-600 text-indigo-600 font-medium rounded-lg hover:bg-indigo-50 transition duration-150"
+                                <a
+                                    href="{{ route('opportunities.analyze', $opportunity['id']) }}"
+                                    class="px-6 py-2.5 border border-purple-600 text-purple-600 font-medium rounded-lg hover:bg-purple-50 transition duration-150 flex items-center"
                                 >
-                                    View Details
-                                </button>
+                                    <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    Analyze Match
+                                </a>
                                 <form method="POST" action="{{ route('opportunities.apply', $opportunity['id']) }}" class="inline">
                                     @csrf
                                     <button

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\TorreApiService;
+use App\Services\CareerStrategistService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -13,9 +14,15 @@ class OpportunityController extends Controller
      */
     private TorreApiService $torreApi;
 
-    public function __construct(TorreApiService $torreApi)
+    /**
+     * Career Strategist Service
+     */
+    private CareerStrategistService $careerStrategist;
+
+    public function __construct(TorreApiService $torreApi, CareerStrategistService $careerStrategist)
     {
         $this->torreApi = $torreApi;
+        $this->careerStrategist = $careerStrategist;
     }
 
     /**
@@ -69,5 +76,50 @@ class OpportunityController extends Controller
         return redirect()
             ->route('opportunities.search')
             ->with('success', "Application submitted successfully for opportunity #{$id}!");
+    }
+
+    /**
+     * Analyze skill gap between user and opportunity
+     */
+    public function analyze($id)
+    {
+        $user = Session::get('user');
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in to analyze opportunities.');
+        }
+
+        // Fetch the opportunity details
+        $opportunity = $this->torreApi->getOpportunity($id);
+
+        if (!$opportunity) {
+            return redirect()
+                ->route('opportunities.search')
+                ->with('error', 'Opportunity not found.');
+        }
+
+        // Get user genome data
+        $userGenome = $user['genome_data'] ?? [];
+
+        if (empty($userGenome)) {
+            return redirect()
+                ->route('opportunities.search')
+                ->with('error', 'Unable to load your profile data. Please log in again.');
+        }
+
+        // Perform AI analysis
+        $analysis = $this->careerStrategist->analyzeSkillGap($userGenome, $opportunity);
+
+        if (!$analysis) {
+            return redirect()
+                ->route('opportunities.search')
+                ->with('error', 'Unable to perform analysis. Please ensure OpenAI API is configured.');
+        }
+
+        return view('analysis', [
+            'analysis' => $analysis,
+            'opportunity' => $opportunity,
+            'user' => $user,
+        ]);
     }
 }

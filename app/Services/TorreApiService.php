@@ -223,7 +223,7 @@ class TorreApiService
         try {
             $response = Http::timeout($this->timeout)
                 ->retry($this->retryTimes, $this->retrySleep)
-                ->get("{$this->baseUrl}/opportunities/{$opportunityId}");
+                ->get("{$this->baseUrl}/suite/opportunities/{$opportunityId}");
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -231,12 +231,18 @@ class TorreApiService
                 // Cache for 1 hour
                 Cache::put($cacheKey, $data, 3600);
 
+                Log::info("Torre API: Fetched and cached opportunity", [
+                    'id' => $opportunityId,
+                    'ttl' => 3600
+                ]);
+
                 return $data;
             }
 
             Log::error("Torre API: Failed to fetch opportunity", [
                 'id' => $opportunityId,
-                'status' => $response->status()
+                'status' => $response->status(),
+                'body' => $response->body()
             ]);
 
             return null;

@@ -14,4 +14,5 @@ Route::middleware('web')->group(function () {
     Route::get('/home', [OpportunityController::class, 'home'])->name('home');
     Route::get('/search', [OpportunityController::class, 'search'])->name('opportunities.search');
     Route::post('/apply/{id}', [OpportunityController::class, 'apply'])->name('opportunities.apply');
+    Route::get('/analyze/{id}', [OpportunityController::class, 'analyze'])->name('opportunities.analyze');
 });

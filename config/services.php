@@ -43,4 +43,20 @@ return [
         'cache_ttl' => env('TORRE_CACHE_TTL', 86400), // 24 hours
     ],
 
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'gemini'), // 'openai' or 'gemini'
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-3.5-turbo'),
+        'timeout' => env('OPENAI_TIMEOUT', 60),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-pro'),
+        'timeout' => env('GEMINI_TIMEOUT', 60),
+    ],
+
 ];
